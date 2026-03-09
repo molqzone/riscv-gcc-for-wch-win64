@@ -148,9 +148,9 @@ $requiredInExtract = @(
   (Join-Path $extractedSource "libexec\\gcc\\riscv32-unknown-elf\\15.2.0\\cc1plus.exe"),
   (Join-Path $extractedSource "riscv32-unknown-elf\\include\\stdio.h"),
   (Join-Path $extractedSource "riscv32-unknown-elf\\lib\\libstdc++.a"),
-  (Join-Path $extractedSource "riscv32-unknown-elf\\lib\\rv32imac_zaamo_zalrsc\\ilp32\\libc_nano.a"),
-  (Join-Path $extractedSource "riscv32-unknown-elf\\lib\\rv32imac_zaamo_zalrsc\\ilp32\\libm_nano.a"),
-  (Join-Path $extractedSource "riscv32-unknown-elf\\lib\\rv32imac_zaamo_zalrsc\\ilp32\\libgloss_nano.a"),
+  (Join-Path $extractedSource "riscv32-unknown-elf\\lib\\libc_nano.a"),
+  (Join-Path $extractedSource "riscv32-unknown-elf\\lib\\libm_nano.a"),
+  (Join-Path $extractedSource "riscv32-unknown-elf\\lib\\libgloss_nano.a"),
   (Join-Path $extractedSource "riscv32-unknown-elf\\lib\\rv32imafc_zicsr_zaamo_zalrsc\\ilp32f\\libc_nano.a"),
   (Join-Path $extractedSource "riscv32-unknown-elf\\lib\\rv32imafc_zicsr_zaamo_zalrsc\\ilp32f\\libm_nano.a"),
   (Join-Path $extractedSource "riscv32-unknown-elf\\lib\\rv32imafc_zicsr_zaamo_zalrsc\\ilp32f\\libgloss_nano.a")
@@ -205,9 +205,9 @@ $required = @(
   (Join-Path $installDir "libexec\\gcc\\riscv32-unknown-elf\\15.2.0\\cc1plus.exe"),
   (Join-Path $installDir "riscv32-unknown-elf\\include\\stdio.h"),
   (Join-Path $installDir "riscv32-unknown-elf\\lib\\libstdc++.a"),
-  (Join-Path $installDir "riscv32-unknown-elf\\lib\\rv32imac_zaamo_zalrsc\\ilp32\\libc_nano.a"),
-  (Join-Path $installDir "riscv32-unknown-elf\\lib\\rv32imac_zaamo_zalrsc\\ilp32\\libm_nano.a"),
-  (Join-Path $installDir "riscv32-unknown-elf\\lib\\rv32imac_zaamo_zalrsc\\ilp32\\libgloss_nano.a"),
+  (Join-Path $installDir "riscv32-unknown-elf\\lib\\libc_nano.a"),
+  (Join-Path $installDir "riscv32-unknown-elf\\lib\\libm_nano.a"),
+  (Join-Path $installDir "riscv32-unknown-elf\\lib\\libgloss_nano.a"),
   (Join-Path $installDir "riscv32-unknown-elf\\lib\\rv32imafc_zicsr_zaamo_zalrsc\\ilp32f\\libc_nano.a"),
   (Join-Path $installDir "riscv32-unknown-elf\\lib\\rv32imafc_zicsr_zaamo_zalrsc\\ilp32f\\libm_nano.a"),
   (Join-Path $installDir "riscv32-unknown-elf\\lib\\rv32imafc_zicsr_zaamo_zalrsc\\ilp32f\\libgloss_nano.a")
@@ -244,6 +244,28 @@ Set-Content -Path $helloCpp -Value "int main(){return 0;}" -NoNewline -Encoding 
 & (Join-Path $installDir "bin\\riscv32-unknown-elf-g++.exe") -march=rv32imac -mabi=ilp32 -Os $helloCpp -o $helloCppElf
 if ($LASTEXITCODE -ne 0) {
   throw "hello c++ compile failed"
+}
+
+$softFloatC = Join-Path $installDir "softfloat-full.c"
+$softFloatElf = Join-Path $installDir "softfloat-full-imac.elf"
+$softFloatSource = @'
+volatile float a = 3.5f;
+volatile float b = 1.25f;
+volatile int si = -7;
+volatile unsigned int ui = 9u;
+
+float fm(void) { return a * b; }
+float fd(void) { return a / b; }
+float fi(void) { return (float)si; }
+float fu(void) { return (float)ui; }
+
+int main(void) { return (int)(fm() + fd() + fi() + fu()); }
+'@
+Set-Content -Path $softFloatC -Value $softFloatSource -Encoding Ascii
+
+& (Join-Path $installDir "bin\\riscv32-unknown-elf-gcc.exe") -march=rv32imac -mabi=ilp32 -Os $softFloatC -o $softFloatElf
+if ($LASTEXITCODE -ne 0) {
+  throw "soft-float helper compile failed for rv32imac/ilp32"
 }
 
 $helloNanoImacElf = Join-Path $installDir "hello-full-nano-imac.elf"
