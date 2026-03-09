@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 ARG PREFIX=/opt/riscv
-ARG ARCH=rv32gc
+ARG ARCH=rv32imac
 ARG ABI=ilp32
 ARG MULTILIB="rv32imac-ilp32--zicsr*zifencei*zaamo*zalrsc;rv32imafc-ilp32f--zicsr*zifencei*zaamo*zalrsc"
 

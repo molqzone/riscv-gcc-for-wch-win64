@@ -59,3 +59,5 @@ powershell -ExecutionPolicy Bypass -File .\run-local-release.ps1 `
 
 - Build logs are written in this directory as `build-run-YYYYMMDD-HHMMSS.log`.
 - `run-full-build.ps1` validates key files in `out/riscv` and fails fast if any are missing.
+- The configured baseline target is `rv32imac/ilp32`, with an additional `rv32imafc/ilp32f` multilib.
+- Installer smoke tests cover `rv32imac/ilp32` soft-float helper linking to catch missing `__mulsf3`/`__divsf3`-class regressions.

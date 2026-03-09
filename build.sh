@@ -413,6 +413,14 @@ git submodule update --init --depth=1 --jobs "$(nproc)" binutils gcc newlib gdb
 cd /src/gcc
 ./contrib/download_prerequisites
 
+# GCC's RISC-V libgcc config omits t-softfp-sfdf in the RISC-V target stanzas,
+# so rv32imac/ilp32 builds miss single-precision soft-float helpers like
+# __mulsf3 and __divsf3.
+if ! grep -q 't-softfp-sfdf riscv/t-softfp${host_address} t-softfp riscv/t-elf' /src/gcc/libgcc/config.host; then
+  sed -i 's#riscv/t-softfp${host_address} t-softfp riscv/t-elf#t-softfp-sfdf riscv/t-softfp${host_address} t-softfp riscv/t-elf#g' /src/gcc/libgcc/config.host
+fi
+grep -n 'riscv/t-softfp' /src/gcc/libgcc/config.host
+
 cd /src
 # Ensure mingw-host expat exists so gdb can link with --with-expat=yes.
 if [ ! -f /usr/x86_64-w64-mingw32/lib/libexpat.a ]; then
@@ -435,7 +443,7 @@ fi
 
 ./configure \
   --prefix=/opt/riscv \
-  --with-arch=rv32gc \
+  --with-arch=rv32imac \
   --with-abi=ilp32 \
   --with-multilib-generator="rv32imac-ilp32--zicsr*zifencei*zaamo*zalrsc;rv32imafc-ilp32f--zicsr*zifencei*zaamo*zalrsc" \
   --enable-languages=c,c++ \
